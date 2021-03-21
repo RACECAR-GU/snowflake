@@ -1,5 +1,7 @@
 git.torproject.org/pluggable-transports/goptlib.git v1.1.0 h1:LMQAA8pAho+QtYrrVNimJQiINNEwcwuuD99vezD/PAo=
 git.torproject.org/pluggable-transports/goptlib.git v1.1.0/go.mod h1:YT4XMSkuEXbtqlydr9+OxqFAyspUv0Gr9qhM3B++o/Q=
+git.torproject.org/pluggable-transports/snowflake.git v0.0.0-20210319030805-087a037f82d7 h1:PIxJMDEKojeXf0UOsMjwl00GUCTRQS01csikTr8quoc=
+git.torproject.org/pluggable-transports/snowflake.git v0.0.0-20210319030805-087a037f82d7/go.mod h1:8T11WzYgqDzACPvk9sdI5ZCSZkmATZ50kjFhAsRoFj4=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
@@ -68,6 +70,8 @@ github.com/pion/rtp v1.6.2/go.mod h1:bDb5n+BFZxXx0Ea7E5qe+klMuqiBrP+w8XSjiWtCUko
 github.com/pion/sctp v1.7.10/go.mod h1:EhpTUQu1/lcK3xI+eriS6/96fWetHGCvBi9MSsnaBN0=
 github.com/pion/sctp v1.7.11 h1:UCnj7MsobLKLuP/Hh+JMiI/6W5Bs/VF45lWKgHFjSIE=
 github.com/pion/sctp v1.7.11/go.mod h1:EhpTUQu1/lcK3xI+eriS6/96fWetHGCvBi9MSsnaBN0=
+github.com/pion/sdp/v2 v2.4.0 h1:luUtaETR5x2KNNpvEMv/r4Y+/kzImzbz4Lm1z8eQNQI=
+github.com/pion/sdp/v2 v2.4.0/go.mod h1:L2LxrOpSTJbAns244vfPChbciR/ReU1KWfG04OpkR7E=
 github.com/pion/sdp/v3 v3.0.4 h1:2Kf+dgrzJflNCSw3TV5v2VLeI0s/qkzy2r5jlR0wzf8=
 github.com/pion/sdp/v3 v3.0.4/go.mod h1:bNiSknmJE0HYBprTHXKPQ3+JjacTv5uap92ueJZKsRk=
 github.com/pion/srtp/v2 v2.0.2 h1:664iGzVmaY7KYS5M0gleY0DscRo9ReDfTxQrq4UgGoU=
