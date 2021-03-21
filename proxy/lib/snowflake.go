@@ -23,8 +23,6 @@ import (
 	"github.com/pion/webrtc/v3"
 )
 
-const defaultProbeURL = "https://snowflake-broker.torproject.net:8443/probe"
-
 const pollInterval = 5 * time.Second
 const (
 	NATUnknown      = "unknown"
@@ -41,7 +39,7 @@ const readLimit = 100000 //Maximum number of bytes to be read from an HTTP reque
 var broker *SignalingServer
 var defaultRelay string
 
-var currentNATType = NATUnknown
+var currentNATType = NATUnrestricted
 
 const (
 	sessionIDLength = 16
@@ -322,10 +320,6 @@ func Proxy(capacity uint, rawBrokerURL, relayURL, stunURL string,
 	for i := uint(0); i < capacity; i++ {
 		tokens <- true
 	}
-
-	// use probetest to determine NAT compatability
-	checkNATType(config, defaultProbeURL)
-	log.Printf("NAT type: %s", currentNATType)
 
 	for {
 		getToken()
