@@ -40,6 +40,7 @@ type BrokerChannel struct {
 	transport          http.RoundTripper // Used to make all requests.
 	keepLocalAddresses bool
 	NATType            string
+	dest               string
 	lock               sync.Mutex
 }
 
@@ -120,6 +121,7 @@ func (bc *BrokerChannel) Negotiate(offer *webrtc.SessionDescription) (
 	// include NAT-TYPE
 	bc.lock.Lock()
 	request.Header.Set("Snowflake-NAT-TYPE", bc.NATType)
+	request.Header.Set("Snowflake-Relay", bc.dest)
 	bc.lock.Unlock()
 	resp, err := bc.transport.RoundTrip(request)
 	if nil != err {
@@ -150,6 +152,13 @@ func (bc *BrokerChannel) SetNATType(NATType string) {
 	bc.NATType = NATType
 	bc.lock.Unlock()
 	log.Printf("NAT Type: %s", NATType)
+}
+
+func (bc *BrokerChannel) SetDestination(addr string) {
+	bc.lock.Lock()
+	bc.dest = addr
+	bc.lock.Unlock()
+	log.Printf("Set destination: %s", addr)
 }
 
 // Implements the |Tongue| interface to catch snowflakes, using BrokerChannel.

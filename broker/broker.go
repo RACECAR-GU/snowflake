@@ -214,7 +214,7 @@ func proxyPolls(ctx *BrokerContext, w http.ResponseWriter, r *http.Request) {
 		ctx.metrics.proxyIdleCount++
 		ctx.metrics.lock.Unlock()
 
-		b, err = messages.EncodePollResponse("", false, "")
+		b, err = messages.EncodePollResponse("", false, "", "")
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -223,7 +223,7 @@ func proxyPolls(ctx *BrokerContext, w http.ResponseWriter, r *http.Request) {
 		w.Write(b)
 		return
 	}
-	b, err = messages.EncodePollResponse(string(offer.sdp), true, offer.natType)
+	b, err = messages.EncodePollResponse(string(offer.sdp), true, offer.natType, offer.relay)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -236,6 +236,7 @@ func proxyPolls(ctx *BrokerContext, w http.ResponseWriter, r *http.Request) {
 // Client offer contains an SDP and the NAT type of the client
 type ClientOffer struct {
 	natType string
+	relay   string
 	sdp     []byte
 }
 
@@ -260,6 +261,8 @@ func clientOffers(ctx *BrokerContext, w http.ResponseWriter, r *http.Request) {
 	if offer.natType == "" {
 		offer.natType = NATUnknown
 	}
+
+	offer.relay = r.Header.Get("Snowflake-Relay")
 
 	// Only hand out known restricted snowflakes to unrestricted clients
 	var snowflakeHeap *SnowflakeHeap

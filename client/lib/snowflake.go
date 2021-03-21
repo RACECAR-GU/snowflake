@@ -81,6 +81,9 @@ func (t *Transport) Dial(address string) (net.Conn, error) {
 	// Use a real logger to periodically output how much traffic is happening.
 	snowflakes.BytesLogger = NewBytesSyncLogger()
 
+	// Set destination address
+	t.dialer.SetDestination(address)
+
 	log.Printf("---- SnowflakeConn: begin collecting snowflakes ---")
 	go connectLoop(snowflakes)
 

@@ -31,6 +31,7 @@ HTTP 200 OK
     sdp: [WebRTC SDP]
   },
   NAT: ["unknown"|"restricted"|"unrestricted"]
+  relay: [relayURL]
 }
 
 2) If a client is not matched:
@@ -122,14 +123,16 @@ type ProxyPollResponse struct {
 	Status string
 	Offer  string
 	NAT    string
+	Relay  string
 }
 
-func EncodePollResponse(offer string, success bool, natType string) ([]byte, error) {
+func EncodePollResponse(offer string, success bool, natType string, relay string) ([]byte, error) {
 	if success {
 		return json.Marshal(ProxyPollResponse{
 			Status: "client match",
 			Offer:  offer,
 			NAT:    natType,
+			Relay:  relay,
 		})
 
 	}
@@ -140,20 +143,20 @@ func EncodePollResponse(offer string, success bool, natType string) ([]byte, err
 
 // Decodes a poll response from the broker and returns an offer and the client's NAT type
 // If there is a client match, the returned offer string will be non-empty
-func DecodePollResponse(data []byte) (string, string, error) {
+func DecodePollResponse(data []byte) (string, string, string, error) {
 	var message ProxyPollResponse
 
 	err := json.Unmarshal(data, &message)
 	if err != nil {
-		return "", "", err
+		return "", "", "", err
 	}
 	if message.Status == "" {
-		return "", "", fmt.Errorf("received invalid data")
+		return "", "", "", fmt.Errorf("received invalid data")
 	}
 
 	if message.Status == "client match" {
 		if message.Offer == "" {
-			return "", "", fmt.Errorf("no supplied offer")
+			return "", "", "", fmt.Errorf("no supplied offer")
 		}
 	} else {
 		message.Offer = ""
@@ -164,7 +167,7 @@ func DecodePollResponse(data []byte) (string, string, error) {
 		natType = "unknown"
 	}
 
-	return message.Offer, natType, nil
+	return message.Offer, natType, message.Relay, nil
 }
 
 type ProxyAnswerRequest struct {

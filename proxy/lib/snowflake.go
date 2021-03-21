@@ -39,7 +39,7 @@ const dataChannelTimeout = 20 * time.Second
 const readLimit = 100000 //Maximum number of bytes to be read from an HTTP request
 
 var broker *SignalingServer
-var relay string
+var defaultRelay string
 
 var currentNATType = NATUnknown
 
@@ -156,7 +156,7 @@ func (s *SignalingServer) Post(path string, payload io.Reader) ([]byte, error) {
 	return limitedRead(resp.Body, readLimit)
 }
 
-func (s *SignalingServer) pollOffer(sid string) *webrtc.SessionDescription {
+func (s *SignalingServer) pollOffer(sid string) (*webrtc.SessionDescription, string) {
 	brokerPath := s.url.ResolveReference(&url.URL{Path: "proxy"})
 	timeOfNextPoll := time.Now()
 	for {
@@ -174,26 +174,26 @@ func (s *SignalingServer) pollOffer(sid string) *webrtc.SessionDescription {
 		body, err := messages.EncodePollRequest(sid, "standalone", currentNATType)
 		if err != nil {
 			log.Printf("Error encoding poll message: %s", err.Error())
-			return nil
+			return nil, ""
 		}
 		resp, err := s.Post(brokerPath.String(), bytes.NewBuffer(body))
 		if err != nil {
 			log.Printf("error polling broker: %s", err.Error())
 		}
 
-		offer, _, err := messages.DecodePollResponse(resp)
+		offer, _, relay, err := messages.DecodePollResponse(resp)
 		if err != nil {
 			log.Printf("Error reading broker response: %s", err.Error())
 			log.Printf("body: %s", resp)
-			return nil
+			return nil, ""
 		}
 		if offer != "" {
 			offer, err := util.DeserializeSessionDescription(offer)
 			if err != nil {
 				log.Printf("Error processing session description: %s", err.Error())
-				return nil
+				return nil, ""
 			}
-			return offer
+			return offer, relay
 
 		}
 	}
@@ -251,14 +251,14 @@ func CopyLoop(c1 io.ReadWriteCloser, c2 io.ReadWriteCloser) {
 }
 
 func runSession(sid string) {
-	offer := broker.pollOffer(sid)
+	offer, addr := broker.pollOffer(sid)
 	if offer == nil {
 		log.Printf("bad offer from broker")
 		retToken()
 		return
 	}
 	dataChan := make(chan struct{})
-	pc, err := makePeerConnectionFromOffer(offer, config, dataChan, datachannelHandler)
+	pc, err := makePeerConnectionFromOffer(offer, config, dataChan, datachannelHandler, addr)
 	if err != nil {
 		log.Printf("error making WebRTC connection: %s", err)
 		retToken()
@@ -293,7 +293,7 @@ func Proxy(capacity uint, rawBrokerURL, relayURL, stunURL string,
 
 	var err error
 
-	relay = relayURL
+	defaultRelay = relayURL
 	broker = new(SignalingServer)
 	broker.keepLocalAddresses = keepLocalAddresses
 	broker.url, err = url.Parse(rawBrokerURL)
@@ -304,7 +304,7 @@ func Proxy(capacity uint, rawBrokerURL, relayURL, stunURL string,
 	if err != nil {
 		log.Fatalf("invalid stun url: %s", err)
 	}
-	_, err = url.Parse(relay)
+	_, err = url.Parse(defaultRelay)
 	if err != nil {
 		log.Fatalf("invalid relay url: %s", err)
 	}
@@ -363,7 +363,7 @@ func checkNATType(config webrtc.Configuration, probeURL string) {
 	}
 
 	// send offer
-	body, err := messages.EncodePollResponse(sdp, true, "")
+	body, err := messages.EncodePollResponse(sdp, true, "", "")
 	if err != nil {
 		log.Printf("Error encoding probe message: %s", err.Error())
 		return

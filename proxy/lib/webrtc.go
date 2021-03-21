@@ -78,10 +78,13 @@ func (c *webRTCConn) SetWriteDeadline(t time.Time) error {
 // conn.RemoteAddr() inside this function, as a workaround for a hang that
 // otherwise occurs inside of conn.pc.RemoteDescription() (called by
 // RemoteAddr). https://bugs.torproject.org/18628#comment:8
-func datachannelHandler(conn *webRTCConn, remoteAddr net.Addr) {
+func datachannelHandler(conn *webRTCConn, remoteAddr net.Addr, relay string) {
 	defer conn.Close()
 	defer retToken()
 
+	if relay == "" {
+		relay = defaultRelay
+	}
 	u, err := url.Parse(relay)
 	if err != nil {
 		log.Fatalf("invalid relay url: %s", err)
@@ -116,7 +119,8 @@ func datachannelHandler(conn *webRTCConn, remoteAddr net.Addr) {
 func makePeerConnectionFromOffer(sdp *webrtc.SessionDescription,
 	config webrtc.Configuration,
 	dataChan chan struct{},
-	handler func(conn *webRTCConn, remoteAddr net.Addr)) (*webrtc.PeerConnection, error) {
+	handler func(conn *webRTCConn, remoteAddr net.Addr, relay string),
+	relay string) (*webrtc.PeerConnection, error) {
 
 	pc, err := webrtc.NewPeerConnection(config)
 	if err != nil {
@@ -156,7 +160,7 @@ func makePeerConnectionFromOffer(sdp *webrtc.SessionDescription,
 			}
 		})
 
-		go handler(conn, conn.RemoteAddr())
+		go handler(conn, conn.RemoteAddr(), relay)
 	})
 	// As of v3.0.0, pion-webrtc uses trickle ICE by default.
 	// We have to wait for candidate gathering to complete
