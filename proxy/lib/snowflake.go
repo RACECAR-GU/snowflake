@@ -16,8 +16,8 @@ import (
 	"sync"
 	"time"
 
-	"git.torproject.org/pluggable-transports/snowflake.git/common/messages"
 	"git.torproject.org/pluggable-transports/snowflake.git/common/util"
+	"github.com/RACECAR-GU/snowflake/common/messages"
 	"github.com/pion/ice/v2"
 	"github.com/pion/sdp/v2"
 	"github.com/pion/webrtc/v3"
