@@ -167,7 +167,8 @@ func (l *SnowflakeListener) acceptStreams(conn *kcp.UDPSession) error {
 
 	smuxConfig := smux.DefaultConfig()
 	smuxConfig.Version = 2
-	smuxConfig.KeepAliveTimeout = 10 * time.Minute
+	smuxConfig.KeepAliveTimeout = 1 * time.Minute
+	smuxConfig.KeepAliveDisabled = true
 	sess, err := smux.Server(conn, smuxConfig)
 	if err != nil {
 		return err

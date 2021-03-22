@@ -93,6 +93,9 @@ func (handler *HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//Set the read deadline for a connection
+	conn.SetReadDeadline(time.Now().Add(30 * time.Second))
+
 	switch {
 	case bytes.Equal(token[:], turbotunnel.Token[:]):
 		err = turbotunnelMode(conn, addr, handler.pconn)
