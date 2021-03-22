@@ -13,7 +13,7 @@ require (
 	github.com/pion/webrtc/v3 v3.0.15
 	github.com/smartystreets/goconvey v1.6.4
 	github.com/xtaci/kcp-go/v5 v5.5.12
-	github.com/xtaci/smux v1.5.12
+	github.com/xtaci/smux v1.5.15-0.20200704123958-f7188026ba01
 	golang.org/x/crypto v0.0.0-20210317152858-513c2a44f670
 	golang.org/x/net v0.0.0-20210316092652-d523dce5a7f4
 )

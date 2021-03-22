@@ -249,7 +249,8 @@ func newSession(snowflakes SnowflakeCollector) (net.PacketConn, *smux.Session, e
 	// On the KCP connection we overlay an smux session and stream.
 	smuxConfig := smux.DefaultConfig()
 	smuxConfig.Version = 2
-	smuxConfig.KeepAliveTimeout = 10 * time.Minute
+	smuxConfig.KeepAliveTimeout = 1 * time.Minute
+	smuxConfig.KeepAliveDisabled = true
 	sess, err := smux.Client(conn, smuxConfig)
 	if err != nil {
 		conn.Close()
