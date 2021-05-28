@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"testing"
 
-	"git.torproject.org/pluggable-transports/snowflake.git/common/util"
+	"github.com/RACECAR-GU/snowflake/common/util"
 	. "github.com/smartystreets/goconvey/convey"
 )
 

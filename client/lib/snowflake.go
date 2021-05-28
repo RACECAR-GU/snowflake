@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"git.torproject.org/pluggable-transports/snowflake.git/common/nat"
-	"git.torproject.org/pluggable-transports/snowflake.git/common/turbotunnel"
+	"github.com/RACECAR-GU/snowflake/common/nat"
+	"github.com/RACECAR-GU/snowflake/common/turbotunnel"
 	"github.com/pion/webrtc/v3"
 	"github.com/xtaci/kcp-go/v5"
 	"github.com/xtaci/smux"

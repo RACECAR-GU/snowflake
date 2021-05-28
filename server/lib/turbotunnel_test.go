@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"testing"
 
-	"git.torproject.org/pluggable-transports/snowflake.git/common/turbotunnel"
+	"github.com/RACECAR-GU/snowflake/common/turbotunnel"
 )
 
 func TestClientIDMap(t *testing.T) {

@@ -3,7 +3,7 @@ package lib
 import (
 	"sync"
 
-	"git.torproject.org/pluggable-transports/snowflake.git/common/turbotunnel"
+	"github.com/RACECAR-GU/snowflake/common/turbotunnel"
 )
 
 // clientIDMap is a fixed-capacity mapping from ClientIDs to address strings.

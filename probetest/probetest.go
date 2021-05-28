@@ -20,9 +20,9 @@ import (
 	"strings"
 	"time"
 
-	"git.torproject.org/pluggable-transports/snowflake.git/common/messages"
-	"git.torproject.org/pluggable-transports/snowflake.git/common/safelog"
-	"git.torproject.org/pluggable-transports/snowflake.git/common/util"
+	"github.com/RACECAR-GU/snowflake/common/messages"
+	"github.com/RACECAR-GU/snowflake/common/safelog"
+	"github.com/RACECAR-GU/snowflake/common/util"
 
 	"github.com/pion/webrtc/v3"
 	"golang.org/x/crypto/acme/autocert"

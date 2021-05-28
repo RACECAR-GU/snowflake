@@ -17,11 +17,11 @@ import (
 	"sync"
 	"syscall"
 
-	"git.torproject.org/pluggable-transports/snowflake.git/common/safelog"
+	"github.com/RACECAR-GU/snowflake/common/safelog"
 	"golang.org/x/crypto/acme/autocert"
 
 	pt "git.torproject.org/pluggable-transports/goptlib.git"
-	sf "git.torproject.org/pluggable-transports/snowflake.git/server/lib"
+	sf "github.com/RACECAR-GU/snowflake/server/lib"
 )
 
 const ptMethodName = "snowflake"
