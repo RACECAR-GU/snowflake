@@ -29,7 +29,6 @@ import (
 )
 
 const defaultBrokerURL = "https://snowflake-broker.bamsoftware.com/"
-const defaultProbeURL = "https://snowflake-broker.torproject.net:8443/probe"
 const defaultRelayURL = "wss://snowflake.bamsoftware.com/"
 const defaultSTUNURL = "stun:stun.stunprotocol.org:3478"
 const pollInterval = 5 * time.Second
@@ -48,7 +47,7 @@ const readLimit = 100000 //Maximum number of bytes to be read from an HTTP reque
 var broker *SignalingServer
 var relayURL string
 
-var currentNATType = NATUnknown
+var currentNATType = NATUnrestricted
 
 const (
 	sessionIDLength = 16
@@ -593,10 +592,6 @@ func main() {
 	for i := uint(0); i < capacity; i++ {
 		tokens <- true
 	}
-
-	// use probetest to determine NAT compatability
-	checkNATType(config, defaultProbeURL)
-	log.Printf("NAT type: %s", currentNATType)
 
 	for {
 		getToken()
