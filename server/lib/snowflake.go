@@ -121,7 +121,7 @@ type SnowflakeListener struct {
 	server    *http.Server
 	ln        *kcp.Listener
 	closed    chan struct{}
-	closeOnce sync.Once
+	closeOnce *sync.Once
 }
 
 // Allows the caller to accept incoming Snowflake connections
