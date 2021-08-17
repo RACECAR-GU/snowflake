@@ -1,10 +1,9 @@
-package main
+package proxy
 
 import (
 	"bytes"
 	"crypto/rand"
 	"encoding/base64"
-	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -12,14 +11,12 @@ import (
 	"net"
 	"net/http"
 	"net/url"
-	"os"
 	"regexp"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/RACECAR-GU/snowflake/common/messages"
-	"github.com/RACECAR-GU/snowflake/common/safelog"
 	"github.com/RACECAR-GU/snowflake/common/util"
 	"github.com/RACECAR-GU/snowflake/common/websocketconn"
 	"github.com/gorilla/websocket"
@@ -45,7 +42,6 @@ const dataChannelTimeout = 20 * time.Second
 const readLimit = 100000 //Maximum number of bytes to be read from an HTTP request
 
 var broker *SignalingServer
-var relayURL string
 
 var currentNATType = NATUnrestricted
 
@@ -54,7 +50,6 @@ const (
 )
 
 var (
-	tokens chan bool
 	config webrtc.Configuration
 	client http.Client
 )
@@ -170,12 +165,12 @@ func (c *webRTCConn) SetWriteDeadline(t time.Time) error {
 	return fmt.Errorf("SetWriteDeadline not implemented")
 }
 
-func getToken() {
-	<-tokens
+func (p *SnowflakeProxy) getToken() {
+	<-p.Tokens
 }
 
-func retToken() {
-	tokens <- true
+func (p *SnowflakeProxy) retToken() {
+	p.Tokens <- true
 }
 
 func genSessionID() string {
@@ -320,11 +315,11 @@ func CopyLoop(c1 io.ReadWriteCloser, c2 io.ReadWriteCloser) {
 // conn.RemoteAddr() inside this function, as a workaround for a hang that
 // otherwise occurs inside of conn.pc.RemoteDescription() (called by
 // RemoteAddr). https://bugs.torproject.org/18628#comment:8
-func datachannelHandler(conn *webRTCConn, remoteAddr net.Addr) {
+func (p *SnowflakeProxy) datachannelHandler(conn *webRTCConn, remoteAddr net.Addr) {
 	defer conn.Close()
-	defer retToken()
+	defer p.retToken()
 
-	u, err := url.Parse(relayURL)
+	u, err := url.Parse(p.RelayURL)
 	if err != nil {
 		log.Fatalf("invalid relay url: %s", err)
 	}
@@ -489,18 +484,18 @@ func makeNewPeerConnection(config webrtc.Configuration,
 	return pc, nil
 }
 
-func runSession(sid string) {
+func (p *SnowflakeProxy) runSession(sid string) {
 	offer := broker.pollOffer(sid)
 	if offer == nil {
 		log.Printf("bad offer from broker")
-		retToken()
+		p.retToken()
 		return
 	}
 	dataChan := make(chan struct{})
-	pc, err := makePeerConnectionFromOffer(offer, config, dataChan, datachannelHandler)
+	pc, err := makePeerConnectionFromOffer(offer, config, dataChan, p.datachannelHandler)
 	if err != nil {
 		log.Printf("error making WebRTC connection: %s", err)
-		retToken()
+		p.retToken()
 		return
 	}
 	err = broker.sendAnswer(sid, pc)
@@ -509,7 +504,7 @@ func runSession(sid string) {
 		if inerr := pc.Close(); inerr != nil {
 			log.Printf("error calling pc.Close: %v", inerr)
 		}
-		retToken()
+		p.retToken()
 		return
 	}
 	// Set a timeout on peerconnection. If the connection state has not
@@ -523,58 +518,34 @@ func runSession(sid string) {
 		if err := pc.Close(); err != nil {
 			log.Printf("error calling pc.Close: %v", err)
 		}
-		retToken()
+		p.retToken()
 	}
 }
 
-func main() {
-	var capacity uint
-	var stunURL string
-	var logFilename string
-	var rawBrokerURL string
-	var unsafeLogging bool
-	var keepLocalAddresses bool
+type SnowflakeProxy struct {
+	Capacity           uint
+	StunURL            string
+	BrokerURL          string
+	KeepLocalAddresses bool
+	RelayURL           string
+	Tokens             chan bool
+}
 
-	flag.UintVar(&capacity, "capacity", 10, "maximum concurrent clients")
-	flag.StringVar(&rawBrokerURL, "broker", defaultBrokerURL, "broker URL")
-	flag.StringVar(&relayURL, "relay", defaultRelayURL, "websocket relay URL")
-	flag.StringVar(&stunURL, "stun", defaultSTUNURL, "stun URL")
-	flag.StringVar(&logFilename, "log", "", "log filename")
-	flag.BoolVar(&unsafeLogging, "unsafe-logging", false, "prevent logs from being scrubbed")
-	flag.BoolVar(&keepLocalAddresses, "keep-local-addresses", false, "keep local LAN address ICE candidates")
-	flag.Parse()
-
-	var logOutput io.Writer = os.Stderr
-	log.SetFlags(log.LstdFlags | log.LUTC)
-	if logFilename != "" {
-		f, err := os.OpenFile(logFilename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer f.Close()
-		logOutput = io.MultiWriter(os.Stderr, f)
-	}
-	if unsafeLogging {
-		log.SetOutput(logOutput)
-	} else {
-		// We want to send the log output through our scrubber first
-		log.SetOutput(&safelog.LogScrubber{Output: logOutput})
-	}
-
-	log.Println("starting")
+func (p *SnowflakeProxy) StartProxy() {
+	log.Println("Starting proxy")
 
 	var err error
 	broker = new(SignalingServer)
-	broker.keepLocalAddresses = keepLocalAddresses
-	broker.url, err = url.Parse(rawBrokerURL)
+	broker.keepLocalAddresses = p.KeepLocalAddresses
+	broker.url, err = url.Parse(p.BrokerURL)
 	if err != nil {
 		log.Fatalf("invalid broker url: %s", err)
 	}
-	_, err = url.Parse(stunURL)
+	_, err = url.Parse(p.StunURL)
 	if err != nil {
 		log.Fatalf("invalid stun url: %s", err)
 	}
-	_, err = url.Parse(relayURL)
+	_, err = url.Parse(p.RelayURL)
 	if err != nil {
 		log.Fatalf("invalid relay url: %s", err)
 	}
@@ -584,19 +555,19 @@ func main() {
 	config = webrtc.Configuration{
 		ICEServers: []webrtc.ICEServer{
 			{
-				URLs: []string{stunURL},
+				URLs: []string{p.StunURL},
 			},
 		},
 	}
-	tokens = make(chan bool, capacity)
-	for i := uint(0); i < capacity; i++ {
-		tokens <- true
+	p.Tokens = make(chan bool, p.Capacity)
+	for i := uint(0); i < p.Capacity; i++ {
+		p.Tokens <- true
 	}
 
 	for {
-		getToken()
+		p.getToken()
 		sessionID := genSessionID()
-		runSession(sessionID)
+		p.runSession(sessionID)
 	}
 }
 
