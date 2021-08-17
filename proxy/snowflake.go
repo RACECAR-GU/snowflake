@@ -41,17 +41,10 @@ const dataChannelTimeout = 20 * time.Second
 
 const readLimit = 100000 //Maximum number of bytes to be read from an HTTP request
 
-var broker *SignalingServer
-
 var currentNATType = NATUnrestricted
 
 const (
 	sessionIDLength = 16
-)
-
-var (
-	config webrtc.Configuration
-	client http.Client
 )
 
 var remoteIPPatterns = []*regexp.Regexp{
@@ -484,8 +477,8 @@ func makeNewPeerConnection(config webrtc.Configuration,
 	return pc, nil
 }
 
-func (p *SnowflakeProxy) runSession(sid string) {
-	offer := broker.pollOffer(sid)
+func (p *SnowflakeProxy) runSession(sid string, config webrtc.Configuration) {
+	offer := p.broker.pollOffer(sid)
 	if offer == nil {
 		log.Printf("bad offer from broker")
 		p.retToken()
@@ -498,7 +491,7 @@ func (p *SnowflakeProxy) runSession(sid string) {
 		p.retToken()
 		return
 	}
-	err = broker.sendAnswer(sid, pc)
+	err = p.broker.sendAnswer(sid, pc)
 	if err != nil {
 		log.Printf("error sending answer to client through broker: %s", err)
 		if inerr := pc.Close(); inerr != nil {
@@ -529,15 +522,17 @@ type SnowflakeProxy struct {
 	KeepLocalAddresses bool
 	RelayURL           string
 	Tokens             chan bool
+
+	broker *SignalingServer
 }
 
 func (p *SnowflakeProxy) StartProxy() {
 	log.Println("Starting proxy")
 
 	var err error
-	broker = new(SignalingServer)
-	broker.keepLocalAddresses = p.KeepLocalAddresses
-	broker.url, err = url.Parse(p.BrokerURL)
+	p.broker = new(SignalingServer)
+	p.broker.keepLocalAddresses = p.KeepLocalAddresses
+	p.broker.url, err = url.Parse(p.BrokerURL)
 	if err != nil {
 		log.Fatalf("invalid broker url: %s", err)
 	}
@@ -550,9 +545,9 @@ func (p *SnowflakeProxy) StartProxy() {
 		log.Fatalf("invalid relay url: %s", err)
 	}
 
-	broker.transport = http.DefaultTransport.(*http.Transport)
-	broker.transport.(*http.Transport).ResponseHeaderTimeout = 15 * time.Second
-	config = webrtc.Configuration{
+	p.broker.transport = http.DefaultTransport.(*http.Transport)
+	p.broker.transport.(*http.Transport).ResponseHeaderTimeout = 15 * time.Second
+	config := webrtc.Configuration{
 		ICEServers: []webrtc.ICEServer{
 			{
 				URLs: []string{p.StunURL},
@@ -567,7 +562,7 @@ func (p *SnowflakeProxy) StartProxy() {
 	for {
 		p.getToken()
 		sessionID := genSessionID()
-		p.runSession(sessionID)
+		p.runSession(sessionID, config)
 	}
 }
 
