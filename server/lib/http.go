@@ -208,19 +208,6 @@ func (addr ClientMapAddr) String() string {
 
 // Return a client address
 func clientAddr(clientIPParam string) net.Addr {
-	if clientIPParam == "" {
-		return ClientMapAddr("")
-	}
-	// Check if client addr is a valid IP
-	clientIP := net.ParseIP(clientIPParam)
-	if clientIP == nil {
-		return ClientMapAddr("")
-	}
-	// Check if client addr is 0.0.0.0 or [::]. Some proxies erroneously
-	// report an address of 0.0.0.0: https://bugs.torproject.org/33157.
-	if clientIP.IsUnspecified() {
-		return ClientMapAddr("")
-	}
 	// Add a stub port number. USERADDR requires a port number.
-	return ClientMapAddr((&net.TCPAddr{IP: clientIP, Port: 1, Zone: ""}).String())
+	return ClientMapAddr(clientIPParam)
 }

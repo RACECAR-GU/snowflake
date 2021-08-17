@@ -308,7 +308,7 @@ func CopyLoop(c1 io.ReadWriteCloser, c2 io.ReadWriteCloser) {
 // conn.RemoteAddr() inside this function, as a workaround for a hang that
 // otherwise occurs inside of conn.pc.RemoteDescription() (called by
 // RemoteAddr). https://bugs.torproject.org/18628#comment:8
-func (p *SnowflakeProxy) datachannelHandler(conn *webRTCConn, remoteAddr net.Addr) {
+func (p *SnowflakeProxy) datachannelHandler(conn *webRTCConn) {
 	defer conn.Close()
 	defer p.retToken()
 
@@ -317,15 +317,13 @@ func (p *SnowflakeProxy) datachannelHandler(conn *webRTCConn, remoteAddr net.Add
 		log.Fatalf("invalid relay url: %s", err)
 	}
 
-	if remoteAddr != nil {
-		// Encode client IP address in relay URL
-		q := u.Query()
-		clientIP := remoteAddr.String()
-		q.Set("client_ip", clientIP)
-		u.RawQuery = q.Encode()
-	} else {
-		log.Printf("no remote address given in websocket")
-	}
+	remoteAddr := p.ConnectionId
+
+	// Encode client IP address in relay URL
+	q := u.Query()
+	clientIP := remoteAddr
+	q.Set("client_ip", clientIP)
+	u.RawQuery = q.Encode()
 
 	ws, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
 	if err != nil {
@@ -346,7 +344,7 @@ func (p *SnowflakeProxy) datachannelHandler(conn *webRTCConn, remoteAddr net.Add
 func makePeerConnectionFromOffer(sdp *webrtc.SessionDescription,
 	config webrtc.Configuration,
 	dataChan chan struct{},
-	handler func(conn *webRTCConn, remoteAddr net.Addr)) (*webrtc.PeerConnection, error) {
+	handler func(conn *webRTCConn)) (*webrtc.PeerConnection, error) {
 
 	pc, err := webrtc.NewPeerConnection(config)
 	if err != nil {
@@ -386,7 +384,7 @@ func makePeerConnectionFromOffer(sdp *webrtc.SessionDescription,
 			}
 		})
 
-		go handler(conn, conn.RemoteAddr())
+		go handler(conn)
 	})
 	// As of v3.0.0, pion-webrtc uses trickle ICE by default.
 	// We have to wait for candidate gathering to complete
@@ -522,6 +520,7 @@ type SnowflakeProxy struct {
 	KeepLocalAddresses bool
 	RelayURL           string
 	Tokens             chan bool
+	ConnectionId       string
 
 	broker *SignalingServer
 }
