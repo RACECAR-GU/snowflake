@@ -3,12 +3,11 @@ Broker acts as the HTTP signaling channel.
 It matches clients and snowflake proxies by passing corresponding
 SessionDescriptions in order to negotiate a WebRTC connection.
 */
-package main
+package broker
 
 import (
 	"container/heap"
 	"crypto/tls"
-	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -437,11 +436,10 @@ func metricsHandler(metricsFilename string, w http.ResponseWriter, r *http.Reque
 	}
 }
 
-func main() {
+func RunBroker(addr string) {
 	var acmeEmail string
 	var acmeHostnamesCommas string
 	var acmeCertCacheDir string
-	var addr string
 	var geoipDatabase string
 	var geoip6Database string
 	var disableTLS bool
@@ -450,19 +448,9 @@ func main() {
 	var metricsFilename string
 	var unsafeLogging bool
 
-	flag.StringVar(&acmeEmail, "acme-email", "", "optional contact email for Let's Encrypt notifications")
-	flag.StringVar(&acmeHostnamesCommas, "acme-hostnames", "", "comma-separated hostnames for TLS certificate")
-	flag.StringVar(&certFilename, "cert", "", "TLS certificate file")
-	flag.StringVar(&keyFilename, "key", "", "TLS private key file")
-	flag.StringVar(&acmeCertCacheDir, "acme-cert-cache", "acme-cert-cache", "directory in which certificates should be cached")
-	flag.StringVar(&addr, "addr", ":443", "address to listen on")
-	flag.StringVar(&geoipDatabase, "geoipdb", "/usr/share/tor/geoip", "path to correctly formatted geoip database mapping IPv4 address ranges to country codes")
-	flag.StringVar(&geoip6Database, "geoip6db", "/usr/share/tor/geoip6", "path to correctly formatted geoip database mapping IPv6 address ranges to country codes")
-	flag.BoolVar(&disableTLS, "disable-tls", false, "don't use HTTPS")
-	flag.BoolVar(&disableGeoip, "disable-geoip", false, "don't use geoip for stats collection")
-	flag.StringVar(&metricsFilename, "metrics-log", "", "path to metrics logging output")
-	flag.BoolVar(&unsafeLogging, "unsafe-logging", false, "prevent logs from being scrubbed")
-	flag.Parse()
+	disableTLS = true
+	disableGeoip = true
+	unsafeLogging = true
 
 	var err error
 	var metricsFile io.Writer

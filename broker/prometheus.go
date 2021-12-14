@@ -3,7 +3,7 @@ Implements some additional prometheus metrics that we need for privacy preservin
 counts of users and proxies
 */
 
-package main
+package broker
 
 import (
 	"sync/atomic"

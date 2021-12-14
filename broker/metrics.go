@@ -3,7 +3,7 @@ We export metrics in the format specified in our broker spec:
 https://gitweb.torproject.org/pluggable-transports/snowflake.git/tree/doc/broker-spec.txt
 */
 
-package main
+package broker
 
 import (
 	"fmt"

@@ -25,7 +25,7 @@ It also recognizes, and skips over, blank lines and lines that start
 with '#' (comments).
 
 */
-package main
+package broker
 
 import (
 	"bufio"
