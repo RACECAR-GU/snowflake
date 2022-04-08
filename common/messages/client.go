@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/nat"
+	"github.com/RACECAR-GU/snowflake/common/nat"
 )
 
 const ClientVersion = "1.0"

@@ -12,11 +12,11 @@ import (
 	"sync"
 	"time"
 
-	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/event"
-	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/messages"
-	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/nat"
-	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/util"
-	utlsutil "git.torproject.org/pluggable-transports/snowflake.git/v2/common/utls"
+	"github.com/RACECAR-GU/snowflake/common/event"
+	"github.com/RACECAR-GU/snowflake/common/messages"
+	"github.com/RACECAR-GU/snowflake/common/nat"
+	"github.com/RACECAR-GU/snowflake/common/util"
+	utlsutil "github.com/RACECAR-GU/snowflake/common/utls"
 	"github.com/pion/webrtc/v3"
 	utls "github.com/refraction-networking/utls"
 )

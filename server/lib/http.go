@@ -11,9 +11,10 @@ import (
 	"sync"
 	"time"
 
-	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/encapsulation"
-	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/turbotunnel"
-	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/websocketconn"
+
+	"github.com/RACECAR-GU/snowflake/common/encapsulation"
+	"github.com/RACECAR-GU/snowflake/common/turbotunnel"
+	"github.com/RACECAR-GU/snowflake/common/websocketconn"
 	"github.com/gorilla/websocket"
 )
 

@@ -9,9 +9,9 @@ import (
 	"net/http"
 	"testing"
 
-	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/amp"
-	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/messages"
-	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/nat"
+	"github.com/RACECAR-GU/snowflake/common/amp"
+	"github.com/RACECAR-GU/snowflake/common/messages"
+	"github.com/RACECAR-GU/snowflake/common/nat"
 	. "github.com/smartystreets/goconvey/convey"
 )
 

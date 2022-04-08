@@ -47,7 +47,8 @@ import (
 	"sync"
 	"time"
 
-	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/turbotunnel"
+
+	"github.com/RACECAR-GU/snowflake/common/turbotunnel"
 	"github.com/xtaci/kcp-go/v5"
 	"github.com/xtaci/smux"
 	"golang.org/x/net/http2"

@@ -40,11 +40,11 @@ import (
 	"sync"
 	"time"
 
-	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/event"
-	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/messages"
-	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/task"
-	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/util"
-	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/websocketconn"
+	"github.com/RACECAR-GU/snowflake/common/event"
+	"github.com/RACECAR-GU/snowflake/common/messages"
+	"github.com/RACECAR-GU/snowflake/common/task"
+	"github.com/RACECAR-GU/snowflake/common/util"
+	"github.com/RACECAR-GU/snowflake/common/websocketconn"
 	"github.com/gorilla/websocket"
 	"github.com/pion/webrtc/v3"
 )

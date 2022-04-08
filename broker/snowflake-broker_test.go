@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/amp"
+	"github.com/RACECAR-GU/snowflake/common/amp"
 	. "github.com/smartystreets/goconvey/convey"
 )
 

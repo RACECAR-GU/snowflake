@@ -12,6 +12,7 @@ import (
 	"crypto/tls"
 	"flag"
 	"fmt"
+	"github.com/pion/webrtc/v3"
 	"io"
 	"io/ioutil"
 	"log"
@@ -20,11 +21,10 @@ import (
 	"strings"
 	"time"
 
-	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/messages"
-	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/safelog"
-	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/util"
+	"github.com/RACECAR-GU/snowflake/common/messages"
+	"github.com/RACECAR-GU/snowflake/common/safelog"
+	"github.com/RACECAR-GU/snowflake/common/util"
 
-	"github.com/pion/webrtc/v3"
 	"golang.org/x/crypto/acme/autocert"
 )
 

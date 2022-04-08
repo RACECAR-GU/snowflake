@@ -7,7 +7,7 @@ import (
 	"net"
 	"time"
 
-	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/messages"
+	"github.com/RACECAR-GU/snowflake/common/messages"
 	"github.com/prometheus/client_golang/prometheus"
 )
 

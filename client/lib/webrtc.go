@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/event"
+	"github.com/RACECAR-GU/snowflake/common/event"
 	"github.com/pion/webrtc/v3"
 )
 

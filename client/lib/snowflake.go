@@ -35,9 +35,9 @@ import (
 	"strings"
 	"time"
 
-	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/event"
-	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/nat"
-	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/turbotunnel"
+	"github.com/RACECAR-GU/snowflake/common/event"
+	"github.com/RACECAR-GU/snowflake/common/nat"
+	"github.com/RACECAR-GU/snowflake/common/turbotunnel"
 	"github.com/pion/webrtc/v3"
 	"github.com/xtaci/kcp-go/v5"
 	"github.com/xtaci/smux"

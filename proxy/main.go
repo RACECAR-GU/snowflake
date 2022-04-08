@@ -2,15 +2,15 @@ package main
 
 import (
 	"flag"
-	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/event"
+	"github.com/RACECAR-GU/snowflake/common/event"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"time"
 
-	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/safelog"
-	sf "git.torproject.org/pluggable-transports/snowflake.git/v2/proxy/lib"
+	"github.com/RACECAR-GU/snowflake/common/safelog"
+	sf "github.com/RACECAR-GU/snowflake/proxy/lib"
 )
 
 func main() {
