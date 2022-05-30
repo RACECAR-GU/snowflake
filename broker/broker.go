@@ -177,8 +177,8 @@ func (ctx *BrokerContext) AddSnowflake(id string, proxyType string, natType stri
 		heap.Push(ctx.restrictedSnowflakes, snowflake)
 	}
 	ctx.metrics.promMetrics.AvailableProxies.With(prometheus.Labels{"nat": natType, "type": proxyType}).Inc()
-	ctx.snowflakeLock.Unlock()
 	ctx.idToSnowflake[id] = snowflake
+	ctx.snowflakeLock.Unlock()
 	return snowflake
 }
 
@@ -266,19 +266,10 @@ func clientOffers(ctx *BrokerContext, w http.ResponseWriter, r *http.Request) {
 		offer.natType = NATUnknown
 	}
 
-	// Only hand out known restricted snowflakes to unrestricted clients
-	var snowflakeHeap *SnowflakeHeap
-	if offer.natType == NATUnrestricted {
-		snowflakeHeap = ctx.restrictedSnowflakes
+	snowflake := matchSnowflake(ctx, offer.natType)
+	if snowflake != nil {
+		snowflake.offerChannel <- offer
 	} else {
-		snowflakeHeap = ctx.snowflakes
-	}
-
-	// Immediately fail if there are no snowflakes available.
-	ctx.snowflakeLock.Lock()
-	numSnowflakes := snowflakeHeap.Len()
-	ctx.snowflakeLock.Unlock()
-	if numSnowflakes <= 0 {
 		ctx.metrics.lock.Lock()
 		ctx.metrics.clientDeniedCount++
 		ctx.metrics.promMetrics.ClientPollTotal.With(prometheus.Labels{"nat": offer.natType, "status": "denied"}).Inc()
@@ -291,12 +282,6 @@ func clientOffers(ctx *BrokerContext, w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusServiceUnavailable)
 		return
 	}
-	// Otherwise, find the most available snowflake proxy, and pass the offer to it.
-	// Delete must be deferred in order to correctly process answer request later.
-	ctx.snowflakeLock.Lock()
-	snowflake := heap.Pop(snowflakeHeap).(*Snowflake)
-	ctx.snowflakeLock.Unlock()
-	snowflake.offerChannel <- offer
 
 	// Wait for the answer to be returned on the channel or timeout.
 	select {
@@ -323,6 +308,27 @@ func clientOffers(ctx *BrokerContext, w http.ResponseWriter, r *http.Request) {
 	ctx.metrics.promMetrics.AvailableProxies.With(prometheus.Labels{"nat": snowflake.natType, "type": snowflake.proxyType}).Dec()
 	delete(ctx.idToSnowflake, snowflake.id)
 	ctx.snowflakeLock.Unlock()
+}
+
+func matchSnowflake(ctx *BrokerContext, natType string) *Snowflake {
+	// Only hand out known restricted snowflakes to unrestricted clients
+	var snowflakeHeap *SnowflakeHeap
+	if natType == NATUnrestricted {
+		snowflakeHeap = ctx.restrictedSnowflakes
+	} else {
+		snowflakeHeap = ctx.snowflakes
+	}
+
+	ctx.snowflakeLock.Lock()
+	defer ctx.snowflakeLock.Unlock()
+
+	if snowflakeHeap.Len() > 0 {
+		return heap.Pop(snowflakeHeap).(*Snowflake)
+	} else {
+		return nil
+	}
+}
+
 }
 
 /*
